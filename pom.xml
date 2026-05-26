@@ -15,6 +15,7 @@
     <groupId>com.inventory</groupId>
     <artifactId>inventory</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>war</packaging>
     <name>inventory</name>
     <description>Inventory Management System</description>
 
@@ -97,20 +98,6 @@
     </dependencies>
 
     <build>
-        <!-- JAR 빌드 시 JSP 파일 포함 (Spring Boot 임베디드 Tomcat 이 인식할 위치로 복사) -->
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>src/main/webapp</directory>
-                <targetPath>META-INF/resources</targetPath>
-                <includes>
-                    <include>**/*.*</include>
-                </includes>
-            </resource>
-        </resources>
-
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

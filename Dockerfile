@@ -18,11 +18,11 @@ RUN mvn -B -q clean package -DskipTests
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-# 빌드 산출물만 복사
-COPY --from=build /app/target/inventory-*.jar app.jar
+# 빌드 산출물만 복사 (WAR 패키징 - JSP 정상 동작)
+COPY --from=build /app/target/inventory-*.war app.war
 
 # Render 등 클라우드에서 PORT 환경변수 주입 → Spring 이 ${PORT:8080} 으로 받음
 EXPOSE 8080
 
 # Render 512MB RAM 대비 힙 캡(380MB) + UTF-8 인코딩 고정
-ENTRYPOINT ["java","-Xmx380m","-Dfile.encoding=UTF-8","-jar","app.jar"]
+ENTRYPOINT ["java","-Xmx380m","-Dfile.encoding=UTF-8","-jar","app.war"]
