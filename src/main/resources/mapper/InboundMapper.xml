@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inventory.mapper.InboundMapper">
+
+    <sql id="selectColumns">
+        SELECT inbound_id,
+               production_date,
+               package_unit_kg,
+               package_count,
+               size_um,
+               outbound_qty,
+               (package_count - outbound_qty) AS remaining_qty,
+               printed_yn,
+               remark,
+               created_at
+          FROM inbound
+    </sql>
+
+    <select id="findAll" resultType="Inbound">
+        <include refid="selectColumns"/>
+        <where>
+            <if test="startDate != null and endDate != null">
+                AND production_date BETWEEN #{startDate} AND #{endDate}
+            </if>
+        </where>
+        ORDER BY production_date DESC, inbound_id DESC
+    </select>
+
+    <select id="findById" resultType="Inbound">
+        <include refid="selectColumns"/>
+        WHERE inbound_id = #{inboundId}
+    </select>
+
+    <select id="findByIds" resultType="Inbound">
+        <include refid="selectColumns"/>
+        WHERE inbound_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY inbound_id
+    </select>
+
+    <insert id="insert" parameterType="Inbound">
+        INSERT INTO inbound
+            (inbound_id, production_date, package_unit_kg, package_count, size_um, outbound_qty, remark)
+        VALUES
+            (#{inboundId}, #{productionDate}, #{packageUnitKg}, #{packageCount},
+             #{sizeUm}, #{outboundQty}, #{remark})
+    </insert>
+
+    <update id="update" parameterType="Inbound">
+        UPDATE inbound
+           SET production_date = #{productionDate},
+               package_unit_kg = #{packageUnitKg},
+               package_count   = #{packageCount},
+               size_um         = #{sizeUm},
+               remark          = #{remark}
+         WHERE inbound_id      = #{inboundId}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM inbound WHERE inbound_id = #{inboundId}
+    </delete>
+
+    <!--
+        P-YYYYMMDD-NNN 형식에서 NNN 추출하여 MAX.
+        예: 생산일자 2026-05-21 의 ID 들 중 마지막 순번.
+    -->
+    <select id="findMaxSeqByDate" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(CAST(SUBSTRING(inbound_id FROM '\d+$') AS INTEGER)), 0)
+          FROM inbound
+         WHERE inbound_id LIKE CONCAT('P-', #{dateStr}, '-%')
+    </select>
+
+    <update id="incrementOutboundQty">
+        UPDATE inbound
+           SET outbound_qty = outbound_qty + #{delta}
+         WHERE inbound_id = #{inboundId}
+    </update>
+
+    <update id="decrementOutboundQty">
+        UPDATE inbound
+           SET outbound_qty = GREATEST(outbound_qty - #{delta}, 0)
+         WHERE inbound_id = #{inboundId}
+    </update>
+
+    <update id="updatePrintedYn">
+        UPDATE inbound
+           SET printed_yn = #{flag}
+         WHERE inbound_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- ===== 대시보드 통계 ===== -->
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM inbound
+    </select>
+
+    <select id="sumRemainingStock" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(package_count - outbound_qty), 0) FROM inbound
+    </select>
+
+    <select id="countTodayInbound" resultType="int">
+        SELECT COUNT(*) FROM inbound WHERE production_date = CURRENT_DATE
+    </select>
+
+    <select id="findMonthlyInboundQty" resultType="map">
+        SELECT TO_CHAR(production_date, 'YYYY-MM')      AS "month",
+               COALESCE(SUM(package_count), 0)::INTEGER AS "qty"
+          FROM inbound
+         WHERE production_date >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 month')
+         GROUP BY TO_CHAR(production_date, 'YYYY-MM')
+         ORDER BY "month"
+    </select>
+
+    <select id="findTopStocks" resultType="map">
+        SELECT inbound_id                          AS "inboundId",
+               (package_count - outbound_qty)::INTEGER AS "remaining"
+          FROM inbound
+         WHERE (package_count - outbound_qty) > 0
+         ORDER BY (package_count - outbound_qty) DESC, inbound_id
+         LIMIT 10
+    </select>
+
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inventory.mapper.OutboundMapper">
+
+    <select id="findAll" resultType="Outbound">
+        SELECT o.outbound_id,
+               o.outbound_date,
+               o.coa_code,
+               o.outbound_location,
+               o.remark,
+               o.created_at,
+               COALESCE(s.total_qty, 0)   AS total_qty,
+               COALESCE(s.item_count, 0)  AS item_count
+          FROM outbound o
+          LEFT JOIN (
+              SELECT outbound_id,
+                     SUM(quantity)  AS total_qty,
+                     COUNT(*)       AS item_count
+                FROM outbound_item
+               GROUP BY outbound_id
+          ) s ON s.outbound_id = o.outbound_id
+        <where>
+            <if test="startDate != null and endDate != null">
+                AND o.outbound_date BETWEEN #{startDate} AND #{endDate}
+            </if>
+        </where>
+        ORDER BY o.outbound_date DESC, o.outbound_id DESC
+    </select>
+
+    <select id="findById" resultType="Outbound">
+        SELECT outbound_id, outbound_date, coa_code, outbound_location, remark, created_at
+          FROM outbound
+         WHERE outbound_id = #{outboundId}
+    </select>
+
+    <insert id="insert" parameterType="Outbound">
+        INSERT INTO outbound (outbound_id, outbound_date, coa_code, outbound_location, remark)
+        VALUES (#{outboundId}, #{outboundDate}, #{coaCode}, #{outboundLocation}, #{remark})
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM outbound WHERE outbound_id = #{outboundId}
+    </delete>
+
+    <select id="findMaxSeqByDate" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(CAST(SUBSTRING(outbound_id FROM '\d+$') AS INTEGER)), 0)
+          FROM outbound
+         WHERE outbound_id LIKE CONCAT('O-', #{dateStr}, '-%')
+    </select>
+
+    <!-- ===== 대시보드 통계 ===== -->
+    <select id="countTodayOutbound" resultType="int">
+        SELECT COUNT(*) FROM outbound WHERE outbound_date = CURRENT_DATE
+    </select>
+
+    <select id="sumTodayOutboundQty" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(oi.quantity), 0)
+          FROM outbound o
+          JOIN outbound_item oi ON o.outbound_id = oi.outbound_id
+         WHERE o.outbound_date = CURRENT_DATE
+    </select>
+
+    <select id="findMonthlyOutboundQty" resultType="map">
+        SELECT TO_CHAR(o.outbound_date, 'YYYY-MM')      AS "month",
+               COALESCE(SUM(oi.quantity), 0)::INTEGER  AS "qty"
+          FROM outbound o
+          JOIN outbound_item oi ON o.outbound_id = oi.outbound_id
+         WHERE o.outbound_date >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 month')
+         GROUP BY TO_CHAR(o.outbound_date, 'YYYY-MM')
+         ORDER BY "month"
+    </select>
+
+</mapper>
