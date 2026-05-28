@@ -24,6 +24,7 @@ public class LoginController {
     @PostMapping("/login")
     public String login(@RequestParam String userId,
                         @RequestParam String userPw,
+                        @RequestParam(required = false) String redirect,
                         HttpSession session,
                         Model model) {
         User user = userService.login(userId, userPw);
@@ -32,6 +33,10 @@ public class LoginController {
             return "login";
         }
         session.setAttribute("loginUser", user);
+        // 안전한 내부 경로만 허용 (오픈 리다이렉트 방지)
+        if (redirect != null && redirect.startsWith("/") && !redirect.startsWith("//")) {
+            return "redirect:" + redirect;
+        }
         return "redirect:/main";
     }
 
