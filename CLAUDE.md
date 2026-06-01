@@ -11,7 +11,7 @@
 |------|---------|------|------|-----------|
 | `.` (D:\testPro) | **Inventory** (재고관리) | 8080 | 운영 중 (Render 배포) | (이 파일) |
 | `./alamis-homepage/` | **ARAMIS 회사 홈페이지** | 8081 | 시안 완료, 자료 대기 | `alamis-homepage/CLAUDE.md` |
-| `./lumi/` | **Lumi** (AI 학습 도구) | 8082 | MVP+ 완료 | `lumi/CLAUDE.md` |
+| `./lumi/` | **Lumi** (AI 학습 도구) | 8082 | **Phase 3 완료** (다중 사용자 + ADMIN/USER + 자료 격리) | `lumi/CLAUDE.md` |
 | `./docs/` | 사용설명서 PPT / 캡쳐 등 | - | - | - |
 
 각 프로젝트는 **별도 Git 리포** 입니다. `.gitignore` 에서 서로를 제외합니다.
@@ -124,4 +124,4 @@ $req.AllowAutoRedirect = $false
 
 ---
 
-_마지막 업데이트: Lumi MVP+ 단계까지 완료. 다음 후보: AI 챗봇, 퀴즈 자동 생성, 망각곡선 복습._
+_마지막 업데이트: Lumi Phase 3 완료 (로그인 + ADMIN/USER + 사용자별 자료 격리 + PDF 뷰어 + Flatpickr). 다음 후보: R2 파일 저장소 / AI 챗봇 / 퀴즈 생성._
