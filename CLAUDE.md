@@ -11,7 +11,7 @@
 |------|---------|------|------|-----------|
 | `.` (D:\testPro) | **Inventory** (재고관리) | 8080 | 운영 중 (Render 배포) | (이 파일) |
 | `./alamis-homepage/` | **ARAMIS 회사 홈페이지** | 8081 | 시안 완료, 자료 대기 | `alamis-homepage/CLAUDE.md` |
-| `./lumi/` | **Lumi** (AI 학습 도구) | 8082 | **Phase 3 완료** (다중 사용자 + ADMIN/USER + 자료 격리) | `lumi/CLAUDE.md` |
+| `./lumi/` | **Lumi** (AI 학습 도구) | 8082 | **Phase 5e 완료** (기출문제 + OCR 이미지 크롭 + 오답 체인 트리) | `lumi/CLAUDE.md` |
 | `./docs/` | 사용설명서 PPT / 캡쳐 등 | - | - | - |
 
 각 프로젝트는 **별도 Git 리포** 입니다. `.gitignore` 에서 서로를 제외합니다.

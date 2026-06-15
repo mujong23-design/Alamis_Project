@@ -34,3 +34,9 @@ application-local.properties
 application-secret.properties
 .env
 .env.local
+
+### 별도 프로젝트 폴더 (각자 Git 으로 관리) ###
+/alamis-homepage/
+/lumi/
+/docs/screenshots/
+/docs/slides_preview/
